@@ -1,2 +1,6 @@
 src/input.css
 src/output.css
+node_modules/
+
+package.json
+package-lock.json
