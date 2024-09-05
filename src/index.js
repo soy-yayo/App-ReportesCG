@@ -168,7 +168,7 @@ btnNewReport.addEventListener('click', agregarReporte);
 
 function mostrarReportes() {
     const reportes = JSON.parse(localStorage.getItem('reportes')) || [];
-    const reportesContainer = document.getElementById('reportes-container');
+    const reportesContainer = document.getElementById('reportesList');
 
     // Limpiar el contenido anterior
     reportesContainer.innerHTML = '';
@@ -183,6 +183,7 @@ function mostrarReportes() {
         if (reporte.images && reporte.images.length > 0) {
             imagenesHtml = reporte.images.map(image => `<img src="${image}" alt="Imagen del reporte" class="w-32 h-32 object-cover mr-2 mb-2">`).join('');
         }
+
         reporteDiv.innerHTML = `
             <h3 class="text-lg font-semibold">Reporte ${index + 1}</h3>
             <p><strong>Fecha:</strong> ${reporte.date}</p>
@@ -195,10 +196,45 @@ function mostrarReportes() {
             <p><strong>Trabajos Realizados:</strong> ${reporte.activities.join(', ')}</p>
             <p><strong>Trabajos Pendientes:</strong> ${reporte.pending.join(', ')}</p>
             <div><strong>Imágenes:</strong><div class="flex flex-wrap">${imagenesHtml}</div></div>
+            <button class="btn-editar text-blue-500 hover:text-blue-700 mt-2" data-index="${index}">Editar</button>
+            <button class="btn-eliminar text-red-500 hover:text-red-700 mt-2" data-index="${index}">Eliminar</button>
         `;
 
         reportesContainer.appendChild(reporteDiv);
     });
+
+    // Agregar eventos para editar y eliminar
+    document.querySelectorAll('.btn-eliminar').forEach(button => {
+        button.addEventListener('click', eliminarReporte);
+    });
+
+    document.querySelectorAll('.btn-editar').forEach(button => {
+        button.addEventListener('click', editarReporte);
+    });
 }
+
+function eliminarReporte(event) {
+    const index = event.target.getAttribute('data-index');  // Obtener el índice del reporte a eliminar
+    let reportes = JSON.parse(localStorage.getItem('reportes')) || [];
+
+    // Confirmar eliminación
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "No podrás revertir esta acción.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Eliminar el reporte
+            reportes.splice(index, 1);
+            localStorage.setItem('reportes', JSON.stringify(reportes));  // Guardar los cambios
+            mostrarReportes();  // Volver a mostrar los reportes actualizados
+            Swal.fire('Eliminado', 'El reporte ha sido eliminado.', 'success');
+        }
+    });
+}
+
 
 window.addEventListener('DOMContentLoaded', mostrarReportes);
